@@ -18,8 +18,13 @@ var (
 	ErrSignTokenFailed      = New(100011, "签名token失败")
 	UnAuthority             = New(100012, "未登录或非法访问")
 	ErrUserLoginOtherDevice = New(100013, "当前账号已在其他设备登录")
+	ErrNoPermission         = New(100014, "权限不足")
 
 	// user
 	InvalidPassword = New(100101, "密码错误")
 	UserNotFound    = New(100102, "用户不存在")
+
+	// 菜单
+	MenuNotFound = New(100201, "菜单不存在")
+	MenuExist    = New(100202, "菜单已存在")
 )

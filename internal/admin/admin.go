@@ -65,6 +65,7 @@ func NewApp(name string) (*kratos.App, func()) {
 		panic(err)
 	}
 
+	// 数据库迁移
 	if err = data.AutoMigrate(); err != nil {
 		logger.Log(log.LevelError, "AutoMigrate", err)
 	}

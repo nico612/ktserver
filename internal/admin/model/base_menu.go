@@ -19,6 +19,10 @@ type SysBaseMenu struct {
 	MenuBtn       []SysBaseMenuBtn                           `json:"menuBtn"`
 }
 
+func (SysBaseMenu) TableName() string {
+	return "sys_base_menus"
+}
+
 type Meta struct {
 	ActiveName  string `json:"activeName" gorm:"comment:高亮菜单"`
 	KeepAlive   bool   `json:"keepAlive" gorm:"comment:是否缓存"`           // 是否缓存
@@ -28,14 +32,11 @@ type Meta struct {
 	CloseTab    bool   `json:"closeTab" gorm:"comment:自动关闭tab"`         // 自动关闭tab
 }
 
+// SysBaseMenuParameter 基础菜单参数
 type SysBaseMenuParameter struct {
 	gorm.Model
 	SysBaseMenuID uint
 	Type          string `json:"type" gorm:"comment:地址栏携带参数为params还是query"` // 地址栏携带参数为params还是query
 	Key           string `json:"key" gorm:"comment:地址栏携带参数的key"`            // 地址栏携带参数的key
 	Value         string `json:"value" gorm:"comment:地址栏携带参数的值"`            // 地址栏携带参数的值
-}
-
-func (SysBaseMenu) TableName() string {
-	return "sys_base_menus"
 }

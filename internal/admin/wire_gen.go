@@ -15,6 +15,7 @@ import (
 	"ktserver/internal/admin/server"
 	"ktserver/internal/admin/service"
 	"ktserver/internal/pkg/auth"
+	"ktserver/internal/pkg/authz"
 	"ktserver/internal/pkg/genericoptions"
 	"ktserver/internal/pkg/initdb"
 	"ktserver/internal/pkg/initdb/handler"
@@ -60,7 +61,14 @@ func wireApp(config *conf.Config, mySQLOptions *db.MySQLOptions, redisOptions *d
 	userUseCase := biz.NewUserUseCase(userRepo, redisLocker)
 	userService := service.NewUserService(config, logger, userUseCase)
 	jwtMiddleware := middleware.NewJWTMiddleware(authenticator)
-	router := server.NewRouter(config, baseService, dbuService, userService, jwtMiddleware)
+	casbinAuthorizer := authz.NewCasbinAuthorizer(gormDB, logger)
+	authzMiddleware := middleware.NewAuthzMiddleware(casbinAuthorizer)
+	menuUseCase := biz.NewMenuUseCase(menuRepo)
+	menuService := service.NewMenuService(logger, menuUseCase)
+	authorityRepo := data.NewAuthorityRepo(dataData)
+	authorityUseCase := biz.NewAuthorityUseCase(authorityRepo)
+	authorityService := service.NewAuthorityService(logger, authorityUseCase)
+	router := server.NewRouter(config, baseService, dbuService, userService, jwtMiddleware, authzMiddleware, menuService, authorityService)
 	httpServer := server.NewHTTPServer(config, router, logger)
 	app := newApp(logger, httpServer)
 	return app, func() {

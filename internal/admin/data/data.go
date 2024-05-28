@@ -14,6 +14,7 @@ var ProviderSet = wire.NewSet(
 	NewData,
 	NewUserRepo,
 	NewMenuRepo,
+	NewAuthorityRepo,
 )
 
 // transactionKey is an unique key used in context to store
@@ -69,6 +70,12 @@ func AutoMigrate() error {
 	return DS.db.AutoMigrate(
 		&model.SysApi{},
 		&model.SysUser{},
+		&model.SysBaseMenu{},
+		&model.SysAuthority{},
+		&model.SysDictionary{},
+		&model.SysBaseMenuParameter{},
+		&model.SysBaseMenuBtn{},
+		&model.SysAuthorityBtn{},
 	)
 }
 

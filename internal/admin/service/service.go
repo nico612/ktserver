@@ -16,4 +16,6 @@ var ProviderSet = wire.NewSet(
 	),
 	NewDBUService,
 	NewUserService,
+	NewMenuService,
+	NewAuthorityService,
 )

@@ -15,6 +15,7 @@ import (
 	"ktserver/internal/admin/server"
 	"ktserver/internal/admin/service"
 	"ktserver/internal/pkg/auth"
+	"ktserver/internal/pkg/authz"
 	"ktserver/internal/pkg/genericoptions"
 	"ktserver/internal/pkg/lock"
 	"ktserver/internal/pkg/middleware"
@@ -30,7 +31,9 @@ func wireApp(*conf.Config, *db.MySQLOptions, *db.RedisOptions, *auth.JWTOpts, *g
 				lock.NewRedisLocker,
 				auth.NewDefaultTokener,
 				auth.NewAuthenticator,
+				authz.NewCasbinAuthorizer,
 				middleware.NewJWTMiddleware,
+				middleware.NewAuthzMiddleware,
 			),
 			db.ProviderSet,
 			biz.ProviderSet,

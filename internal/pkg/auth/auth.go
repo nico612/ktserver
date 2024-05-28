@@ -28,6 +28,7 @@ var (
 	CtxClaimsKey  = "ctx-claims-key"
 )
 
+// JWTAuthenticator 认证器
 type JWTAuthenticator struct {
 	tokener  Tokener               // 生成和解析token的方法
 	rds      redis.UniversalClient // redis client 用于存储token的block状态
