@@ -13,19 +13,19 @@ import (
 )
 
 type UserUseCase struct {
-	userRepo data.UserRepo
-	locker   *lock.RedisLocker
+	store  data.IStore
+	locker *lock.RedisLocker
 }
 
-func NewUserUseCase(userRepo data.UserRepo, locker *lock.RedisLocker) *UserUseCase {
+func NewUserUseCase(store data.IStore, locker *lock.RedisLocker) *UserUseCase {
 	return &UserUseCase{
-		userRepo: userRepo,
-		locker:   locker,
+		store:  store,
+		locker: locker,
 	}
 }
 
 func (uc *UserUseCase) FindUserByID(ctx context.Context, userID uint) (*model.SysUser, error) {
-	return uc.userRepo.FindUserByID(ctx, userID)
+	return uc.store.Users().FindUserByID(ctx, userID)
 }
 
 func (uc *UserUseCase) ChangePassword(c context.Context, userID uint, req params.ChangePasswordReq) error {
@@ -41,7 +41,7 @@ func (uc *UserUseCase) ChangePassword(c context.Context, userID uint, req params
 
 	}
 	newPwd := utils.BcryptHash(req.NewPassword)
-	if err = uc.userRepo.ChangePassword(userID, newPwd); err != nil {
+	if err = uc.store.Users().ChangePassword(userID, newPwd); err != nil {
 		return err
 	}
 	return nil

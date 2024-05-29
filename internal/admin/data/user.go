@@ -12,11 +12,11 @@ type UserRepo interface {
 }
 
 type userRepo struct {
-	data *Data
+	data *datastore
 }
 
-// NewUserRepo .
-func NewUserRepo(data *Data) UserRepo {
+// newUserRepo .
+func newUserRepo(data *datastore) UserRepo {
 	return &userRepo{
 		data: data,
 	}

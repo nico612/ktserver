@@ -11,10 +11,8 @@ import (
 
 // ProviderSet is data providers.
 var ProviderSet = wire.NewSet(
-	NewData,
-	NewUserRepo,
-	NewMenuRepo,
-	NewAuthorityRepo,
+	NewStore,
+	wire.Bind(new(IStore), new(*datastore)),
 )
 
 // transactionKey is an unique key used in context to store
@@ -23,39 +21,55 @@ type transactionKey struct{}
 
 var (
 	once sync.Once
-	DS   *Data
+	S    *datastore
 )
 
-// Data .
-type Data struct {
+type IStore interface {
+	Tx(ctx context.Context, fn func(ctx context.Context) error) (err error)
+	Users() UserRepo
+	Menus() MenuRepo
+	Authorities() AuthorityRepo
+}
+
+var _ IStore = (*datastore)(nil)
+
+// datastore .
+type datastore struct {
 	db *gorm.DB
 }
 
-// NewData .
-func NewData(db *gorm.DB, logger log.Logger) (*Data, func(), error) {
+// NewStore .
+func NewStore(db *gorm.DB, logger log.Logger) (*datastore, func(), error) {
 	once.Do(func() {
-		DS = &Data{db: db}
+		S = &datastore{db: db}
 	})
+	return S, cleanup, nil
+}
 
-	cleanup := func() {
-		Close()
-		log.NewHelper(logger).Info("closed the data resources")
-	}
-	return DS, cleanup, nil
+func (ds *datastore) Users() UserRepo {
+	return newUserRepo(ds)
+}
+
+func (ds *datastore) Menus() MenuRepo {
+	return newMenuRepo(ds)
+}
+
+func (ds *datastore) Authorities() AuthorityRepo {
+	return newAuthorityRepo(ds)
 }
 
 // DB .从context中获取事务，如果不存在则返回db
-func (d *Data) DB(ctx context.Context) *gorm.DB {
+func (ds *datastore) DB(ctx context.Context) *gorm.DB {
 	tx, ok := ctx.Value(transactionKey{}).(*gorm.DB)
 	if ok {
 		return tx
 	}
-	return d.db
+	return ds.db
 }
 
 // Tx 事务
-func (d *Data) Tx(ctx context.Context, fn func(ctx context.Context) error) (err error) {
-	return d.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+func (ds *datastore) Tx(ctx context.Context, fn func(ctx context.Context) error) (err error) {
+	return ds.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// 将事务存入context
 		ctx = context.WithValue(ctx, transactionKey{}, tx)
 		return fn(ctx)
@@ -64,10 +78,10 @@ func (d *Data) Tx(ctx context.Context, fn func(ctx context.Context) error) (err 
 
 // AutoMigrate 数据库迁移
 func AutoMigrate() error {
-	if DS == nil {
+	if S == nil {
 		return nil
 	}
-	return DS.db.AutoMigrate(
+	return S.db.AutoMigrate(
 		&model.SysApi{},
 		&model.SysUser{},
 		&model.SysBaseMenu{},
@@ -80,7 +94,7 @@ func AutoMigrate() error {
 }
 
 // Close gorm.db
-func Close() {
-	sqlDB, _ := DS.db.DB()
+func cleanup() {
+	sqlDB, _ := S.db.DB()
 	sqlDB.Close()
 }

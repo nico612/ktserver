@@ -41,13 +41,11 @@ func wireApp(config *conf.Config, mySQLOptions *db.MySQLOptions, redisOptions *d
 	if err != nil {
 		return nil, nil, err
 	}
-	dataData, cleanup, err := data.NewData(gormDB, logger)
+	datastore, cleanup, err := data.NewStore(gormDB, logger)
 	if err != nil {
 		return nil, nil, err
 	}
-	userRepo := data.NewUserRepo(dataData)
-	menuRepo := data.NewMenuRepo(dataData)
-	baseUseCase, err := biz.NewBaseUseCase(config, logger, authenticator, userRepo, menuRepo)
+	baseUseCase, err := biz.NewBaseUseCase(config, logger, authenticator, datastore)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
@@ -58,15 +56,14 @@ func wireApp(config *conf.Config, mySQLOptions *db.MySQLOptions, redisOptions *d
 	initDBService := initdb.NewInitDBService(mysqlInitHandler)
 	dbuService := service.NewDBUService(config, logger, initDBService)
 	redisLocker := lock.NewRedisLocker(logger, universalClient)
-	userUseCase := biz.NewUserUseCase(userRepo, redisLocker)
+	userUseCase := biz.NewUserUseCase(datastore, redisLocker)
 	userService := service.NewUserService(config, logger, userUseCase)
 	jwtMiddleware := middleware.NewJWTMiddleware(authenticator)
 	casbinAuthorizer := authz.NewCasbinAuthorizer(gormDB, logger)
 	authzMiddleware := middleware.NewAuthzMiddleware(casbinAuthorizer)
-	menuUseCase := biz.NewMenuUseCase(menuRepo)
+	menuUseCase := biz.NewMenuUseCase(datastore)
 	menuService := service.NewMenuService(logger, menuUseCase)
-	authorityRepo := data.NewAuthorityRepo(dataData)
-	authorityUseCase := biz.NewAuthorityUseCase(authorityRepo)
+	authorityUseCase := biz.NewAuthorityUseCase(datastore)
 	authorityService := service.NewAuthorityService(logger, authorityUseCase)
 	router := server.NewRouter(config, baseService, dbuService, userService, jwtMiddleware, authzMiddleware, menuService, authorityService)
 	httpServer := server.NewHTTPServer(config, router, logger)

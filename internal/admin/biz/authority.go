@@ -9,20 +9,20 @@ import (
 
 // AuthorityUseCase
 type AuthorityUseCase struct {
-	authorityRepo data.AuthorityRepo
+	store data.IStore
 }
 
 // NewAuthorityUseCase
-func NewAuthorityUseCase(authorityRepo data.AuthorityRepo) *AuthorityUseCase {
+func NewAuthorityUseCase(store data.IStore) *AuthorityUseCase {
 	return &AuthorityUseCase{
-		authorityRepo: authorityRepo,
+		store: store,
 	}
 }
 
 // GetAuthorityList 获取角色列表
 func (c *AuthorityUseCase) GetAuthorityList(ctx context.Context, pageInfo request.Pagination) (params.AuthorityListResponse, error) {
 	pageInfo.Check()
-	total, list, err := c.authorityRepo.GetAuthorityList(ctx, pageInfo)
+	total, list, err := c.store.Authorities().GetAuthorityList(ctx, pageInfo)
 	if err != nil {
 		return params.AuthorityListResponse{}, err
 	}

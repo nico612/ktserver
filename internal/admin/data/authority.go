@@ -12,11 +12,11 @@ type AuthorityRepo interface {
 }
 
 type authorityRepo struct {
-	data *Data
+	data *datastore
 }
 
-// NewAuthorityRepo
-func NewAuthorityRepo(data *Data) AuthorityRepo {
+// newAuthorityRepo
+func newAuthorityRepo(data *datastore) AuthorityRepo {
 	return &authorityRepo{data: data}
 }
 

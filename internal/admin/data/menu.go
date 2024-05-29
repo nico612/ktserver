@@ -20,10 +20,10 @@ type MenuRepo interface {
 const NOT_FOUND_ROUTER = "404"
 
 type menuRepo struct {
-	data *Data
+	data *datastore
 }
 
-func NewMenuRepo(data *Data) MenuRepo {
+func newMenuRepo(data *datastore) MenuRepo {
 	return &menuRepo{
 		data: data,
 	}

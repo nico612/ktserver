@@ -10,19 +10,19 @@ import (
 )
 
 type MenuUseCase struct {
-	menuRepo data.MenuRepo
+	store data.IStore
 }
 
-func NewMenuUseCase(menuRepo data.MenuRepo) *MenuUseCase {
+func NewMenuUseCase(store data.IStore) *MenuUseCase {
 	return &MenuUseCase{
-		menuRepo: menuRepo,
+		store: store,
 	}
 }
 
 func (uc *MenuUseCase) GetMenuTree(ctx context.Context, authorityId uint) (menus []model.SysMenu, err error) {
 
 	// 1. 根据角色id获取所有的菜单树
-	menuTreeMap, err := uc.menuRepo.GetMenuTreeMap(ctx, authorityId)
+	menuTreeMap, err := uc.store.Menus().GetMenuTreeMap(ctx, authorityId)
 	if err != nil {
 		return nil, err
 	}
@@ -46,9 +46,9 @@ func (uc *MenuUseCase) getChildrenList(ctx context.Context, menu *model.SysMenu,
 }
 
 func (uc *MenuUseCase) AddBaseMenu(c context.Context, menu model.SysBaseMenu) error {
-	if _, err := uc.menuRepo.FindBaseMenuByName(c, menu.Name); err != nil {
+	if _, err := uc.store.Menus().FindBaseMenuByName(c, menu.Name); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return uc.menuRepo.AddBaseMenu(c, menu)
+			return uc.store.Menus().AddBaseMenu(c, menu)
 		}
 		return err
 	}
