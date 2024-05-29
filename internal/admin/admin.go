@@ -34,9 +34,9 @@ func newApp(logger log.Logger, hs *http.Server) *kratos.App {
 	)
 }
 
-func NewApp(name string) (*kratos.App, func()) {
+func NewApp() {
 
-	c := conf.ViperParse(name)
+	c := conf.ViperParse(Name)
 
 	logger := log.With(log.NewStdLogger(os.Stdout),
 		"ts", log.DefaultTimestamp,
@@ -64,14 +64,18 @@ func NewApp(name string) (*kratos.App, func()) {
 	if err != nil {
 		panic(err)
 	}
+	defer cleanup()
 
 	// 数据库迁移
-	if err = data.AutoMigrate(); err != nil {
+	if err := data.AutoMigrate(); err != nil {
 		logger.Log(log.LevelError, "AutoMigrate", err)
 	}
 
 	// 注册需要初始化的系统数据
 	source.RegisterSource()
 
-	return app, cleanup
+	// start and wait for stop signal
+	if err := app.Run(); err != nil {
+		panic(err)
+	}
 }

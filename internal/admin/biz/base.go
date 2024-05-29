@@ -13,10 +13,10 @@ import (
 )
 
 type BaseUseCase struct {
-	c             *conf.Config
-	log           *log.Helper
-	userRepo      data.UserRepo
-	menuRepo      data.MenuRepo
+	c     *conf.Config
+	log   *log.Helper
+	store data.IStore
+	//menuRepo      data.MenuRepo
 	authenticator auth.Authenticator
 }
 
@@ -24,21 +24,21 @@ func NewBaseUseCase(
 	c *conf.Config,
 	logger log.Logger,
 	authenticator auth.Authenticator,
-	userRepo data.UserRepo,
-	menuRepo data.MenuRepo,
+	store data.IStore,
+	// userRepo data.UserRepo,
+	// menuRepo data.MenuRepo,
 ) (*BaseUseCase, error) {
 
 	return &BaseUseCase{
 		c:             c,
 		log:           log.NewHelper(logger),
-		userRepo:      userRepo,
 		authenticator: authenticator,
-		menuRepo:      menuRepo,
+		store:         store,
 	}, nil
 }
 
 func (uc *BaseUseCase) Login(c context.Context, req params.Login) (resp params.LoginResponse, err error) {
-	user, err := uc.userRepo.FindUserByName(c, req.Username)
+	user, err := uc.store.Users().FindUserByName(c, req.Username)
 	if err != nil {
 		return
 	}
@@ -47,7 +47,7 @@ func (uc *BaseUseCase) Login(c context.Context, req params.Login) (resp params.L
 		return
 	}
 	// userAuthority
-	userDefaultRouter, err := uc.menuRepo.UserAuthorityDefaultRouter(c, user.Authority.DefaultRouter, user.AuthorityId)
+	userDefaultRouter, err := uc.store.Menus().UserAuthorityDefaultRouter(c, user.Authority.DefaultRouter, user.AuthorityId)
 	if err != nil {
 		return
 	}

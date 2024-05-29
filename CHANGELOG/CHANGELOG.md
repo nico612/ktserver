@@ -1,4 +1,12 @@
 
+<a name="v1.0.2"></a>
+## [v1.0.2](https://github.com/nico612/ktserver/compare/v1.0.1...v1.0.2) (2024-05-29)
+
+### Add
+
+* **project:** 项目初始化，基础架构和功能
+
+
 <a name="v1.0.1"></a>
 ## [v1.0.1](https://github.com/nico612/ktserver/compare/v1.0.0...v1.0.1) (2024-05-28)
 
