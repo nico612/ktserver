@@ -1,6 +1,9 @@
 package bizerr
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
 
 type CodeMsg struct {
 	Code int    `json:"code"`
@@ -32,10 +35,13 @@ func (e CodeMsg) WithMsgf(format string, args ...interface{}) CodeMsg {
 
 // codeMsgMap stores the error code and message.
 var codeMsgMap = make(map[int]string)
+var mutex sync.Mutex
 
 // New returns an error with the supplied message.
 func New(code int, msg string) CodeMsg {
 	// Store the error code and message, and determine if it is a duplicate definition
+	mutex.Lock()
+	defer mutex.Unlock()
 	if _, ok := codeMsgMap[code]; ok {
 		panic("error code already exists: " + msg)
 	}

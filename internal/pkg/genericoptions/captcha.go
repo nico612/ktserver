@@ -2,6 +2,7 @@ package genericoptions
 
 import "time"
 
+// CaptchaOptions 图形验证码配置
 type CaptchaOptions struct {
 	ImageWidth    int           `json:"image-width,omitempty" mapstructure:"image-width,omitempty"`
 	ImageHeight   int           `json:"image-height,omitempty" mapstructure:"image-height,omitempty"`

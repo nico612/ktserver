@@ -5,4 +5,8 @@ import (
 )
 
 // ProviderSet is server providers.
-var ProviderSet = wire.NewSet(NewHTTPServer, NewRouter)
+var ProviderSet = wire.NewSet(
+	NewHTTPServer,
+	wire.Struct(new(RouterService), "*"),
+	NewRouter,
+)
